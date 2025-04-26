@@ -28,14 +28,6 @@ in {
 
   _file = ./default.nix;
 
-  # Make all our library functions available to modules
-  config._module.args.lib = lib.extend (self: super: {
-    ${namespace} = import ../../../lib {
-      lib = super;
-      inherit inputs;
-      snowfall-inputs = inputs;
-    };
-  });
 
   imports = [
     ./clients
@@ -52,18 +44,31 @@ in {
     };
   };
 
-  config = lib.mkIf cfg.enable {
-    # This ensures the MCP directory exists
-    system.activationScripts.postUserActivation.text = ''
-      mkdir -p "${cfg.configPath}"
-    '';
-
-    # Add assertions to ensure proper configuration
-    assertions = [
-      {
-        assertion = !(cfg.clients.claude.enable && cfg.clients.claude.useFilesystemServer) || cfg.servers.filesystem.enable;
-        message = "When Claude is configured to use the filesystem server, the filesystem server must be enabled.";
-      }
-    ];
-  };
+ config = lib.mkMerge [
+  # Add the lib extension
+  {
+    _module.args.lib = lib.extend (self: super: {
+      ${namespace} = import ../../../lib {
+        lib = super;
+        inherit inputs;
+        snowfall-inputs = inputs;
+      };
+    });
+  }
+   # Conditionally enable the rest based on cfg.enable
+   (lib.mkIf cfg.enable {
+     # This ensures the MCP directory exists
+     system.activationScripts.postUserActivation.text = ''
+       mkdir -p "${cfg.configPath}"
+     '';
+     
+     # Add assertions to ensure proper configuration
+     assertions = [
+       {
+         assertion = !(cfg.clients.claude.enable && cfg.clients.claude.useFilesystemServer) || cfg.servers.filesystem.enable;
+         message = "When Claude is configured to use the filesystem server, the filesystem server must be enabled.";
+       }
+     ];
+   })
+ ];
 }
