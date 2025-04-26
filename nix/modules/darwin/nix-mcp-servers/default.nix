@@ -18,11 +18,11 @@
   # An attribute map of your defined hosts.
   systems,
   # All other arguments come from the module system.
-  moduleConfig,
+  config,
   ...
 }: let
   namespace = "nix-mcp-servers";
-  cfg = moduleConfig.${namespace};
+  cfg = config.${namespace};
 in {
   # config.${namespace}.default
 
@@ -40,7 +40,7 @@ in {
     configPath = lib.mkOption {
       type = str;
       description = "Path where to store MCP configuration files";
-      default = "${config.users.users.${config.users.primaryUser}.home}/Library/Application Support/mcp";
+      default = "~/Library/Application Support/mcp";
     };
   };
 
