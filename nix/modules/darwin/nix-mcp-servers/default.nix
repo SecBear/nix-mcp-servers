@@ -18,11 +18,11 @@
   # An attribute map of your defined hosts.
   systems,
   # All other arguments come from the module system.
-  config,
+  moduleConfig,
   ...
 }: let
   namespace = "nix-mcp-servers";
-  cfg = config.${namespace};
+  cfg = moduleConfig.${namespace};
 in {
   # config.${namespace}.default
 
